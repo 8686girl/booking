@@ -626,10 +626,19 @@ async function saveSettings(){
   toast('体験の設定を保存しました');renderBar();
 }
 
-/* ---------- init ---------- */
+/* ---------- init: URLで表示を切り替え（末尾が #admin なら管理画面） ---------- */
+window.addEventListener('hashchange',()=>location.reload());
 (async function init(){
-  try{await loadPublic();}catch(e){console.error(e);}
-  setLang('ja');
+  const tabs=document.querySelector('.tabs');if(tabs)tabs.style.display='none'; // お客様/管理の切替タブは非表示（URLで分ける）
+  const isAdmin=location.hash.slice(1).toLowerCase()==='admin';
+  if(isAdmin){
+    const lang=document.querySelector('.lang');if(lang)lang.style.display='none';
+    setLang('ja');
+    showView('admin');
+  }else{
+    try{await loadPublic();}catch(e){console.error(e);}
+    setLang('ja');
+  }
 })();
 </script>
 </body>
