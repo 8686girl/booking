@@ -345,6 +345,7 @@
       <button class="on" id="at-res" onclick="admTab('res')">予約一覧</button>
       <button id="at-slot" onclick="admTab('slot')">空き枠の設定（日付ごと）</button>
       <button id="at-set" onclick="admTab('set')">体験の設定</button>
+      <button id="at-acct" onclick="admTab('acct')">管理者</button>
     </div>
 
     <!-- reservations -->
@@ -391,6 +392,21 @@
         <div class="set-row"><label class="f" style="margin:0">所要時間（英語）</label><input id="s-dur-en" placeholder="90 min"></div>
         <div style="height:16px"></div>
         <button class="btn btn-primary" style="width:auto" onclick="saveSettings()">設定を保存</button>
+      </div>
+    </div>
+
+    <!-- admins -->
+    <div id="adm-acct" style="display:none">
+      <div class="card" style="padding:22px;max-width:560px">
+        <b style="font-size:15px">管理者を追加</b>
+        <p style="color:var(--sub);font-size:13px;margin:6px 0 14px">新しい管理者のメールアドレスとパスワードを設定します。追加後、その方は管理画面（URLの末尾に <b>#admin</b> を付けたページ）から、同じメール・パスワードでログインできます。</p>
+        <label class="f" style="margin:0">メールアドレス</label>
+        <input id="na-email" inputmode="email" autocomplete="off">
+        <label class="f">パスワード（6文字以上）</label>
+        <input id="na-pass" type="password" autocomplete="new-password">
+        <div style="height:14px"></div>
+        <button class="btn btn-primary" style="width:auto" id="btn-add-admin" onclick="addAdmin()">管理者を追加</button>
+        <p id="na-msg" style="font-size:12.5px;line-height:1.7;margin:12px 0 0"></p>
       </div>
     </div>
   </div>
@@ -645,10 +661,32 @@ async function adminLogin(){
   enterAdmin();
 }
 async function adminLogout(){await sb.auth.signOut();enterAdmin();}
+async function addAdmin(){
+  const email=document.getElementById('na-email').value.trim();
+  const pass=document.getElementById('na-pass').value;
+  const msg=document.getElementById('na-msg');
+  msg.style.color='#c0392b';msg.textContent='';
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){msg.textContent='メールアドレスの形式をご確認ください。';return;}
+  if(pass.length<6){msg.textContent='パスワードは6文字以上で設定してください。';return;}
+  const btn=document.getElementById('btn-add-admin');btn.disabled=true;btn.textContent='追加中…';
+  // 現在ログイン中の管理者のセッションを控えておく（追加後に復元してログアウトを防ぐ）
+  const {data:{session:cur}}=await sb.auth.getSession();
+  const {data,error}=await sb.auth.signUp({email,password:pass});
+  if(cur){try{await sb.auth.setSession({access_token:cur.access_token,refresh_token:cur.refresh_token});}catch(e){}}
+  btn.disabled=false;btn.textContent='管理者を追加';
+  if(error){msg.textContent='追加できませんでした（'+error.message+'）。すでに登録済みのメール、または新規登録が無効になっている可能性があります。';return;}
+  document.getElementById('na-email').value='';document.getElementById('na-pass').value='';
+  msg.style.color='var(--brand)';
+  if(data&&!data.session&&data.user){
+    msg.textContent='確認メールを送信しました。新しい管理者は届いたメール内のリンクを承認したあと、このメール・パスワードでログインできます。';
+  }else{
+    msg.textContent='管理者を追加しました。新しい管理者は「'+email+'」とこのパスワードでログインできます。';
+  }
+}
 
 /* ---------- admin: tabs ---------- */
 function admTab(tab){
-  ['res','slot','set'].forEach(x=>{
+  ['res','slot','set','acct'].forEach(x=>{
     document.getElementById('adm-'+x).style.display=x===tab?'block':'none';
     document.getElementById('at-'+x).classList.toggle('on',x===tab);
   });
