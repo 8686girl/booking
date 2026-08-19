@@ -186,14 +186,14 @@
 
   <h2 class="sec"><span class="only-ja">体験について</span><span class="only-en">About this experience</span></h2>
   <p class="lead">
-    <span class="only-ja">松山の趣ある古民家で、日本の書道を体験。<br>自分だけの漢字を書いて持ち帰り、静かな庭で抹茶を味わうひとときを。</span>
+    <span class="only-ja">松山の趣ある古民家で、日本の書道を体験。<br>自分だけの漢字を書いて持ち帰り、静かな古民家で抹茶を味わうひとときを。</span>
     <span class="only-en">Experience Japanese calligraphy in a charming old house in Matsuyama — write your own kanji to take home, and enjoy matcha in the quiet garden.</span>
   </p>
   <div class="intro-grid">
     <div class="intro-text">
-      <p class="only-ja">書道家がやさしくお教えします。筆の持ち方から始め、あなたのお名前や心に響く漢字を、一枚の作品に仕上げていきます。書道がはじめての方も、どうぞ安心してご参加ください。</p>
+      <p class="only-ja">筆の持ち方からやさしくお教えします。あなたのお名前や心に響く漢字を、一枚の作品に仕上げていきます。書道がはじめての方も、どうぞ安心してご参加ください。</p>
       <p class="only-ja">完成した作品は、伝統的な和紙で飾ってお持ち帰りいただけます。抹茶をお楽しみ頂けます。場内の日本庭園で撮影したり、ゆっくりとした時間をお過ごし下さい。</p>
-      <p class="only-en">A calligrapher guides you gently. Starting from how to hold the brush, you'll craft your name or a character close to your heart into a finished work — first-timers are warmly welcome.</p>
+      <p class="only-en">We'll gently guide you from how to hold the brush. You'll craft your name or a character close to your heart into a finished work — first-timers are warmly welcome.</p>
       <p class="only-en">Take your finished piece home, mounted on traditional washi. Enjoy some matcha, take photos in the Japanese garden on site, and spend an unhurried moment here.</p>
     </div>
     <!-- サブ写真：images/about.jpg をアップロードすると表示されます -->
@@ -225,7 +225,7 @@
       <div class="flow-no">3</div>
       <div class="flow-tx">
         <b><span class="only-ja">基本の練習</span><span class="only-en">Basic practice</span></b>
-        <p><span class="only-ja">筆の持ち方、墨の使い方、基本的な筆使い（線・点・払い）を練習します。</span><span class="only-en">Practice how to hold the brush, use the ink, and the basic strokes — lines, dots and sweeps.</span></p>
+        <p><span class="only-ja">筆の持ち方、墨の使い方、基本的な筆使い（線・止め・払い）を練習します。</span><span class="only-en">Practice how to hold the brush, use the ink, and the basic strokes — lines, stops, and sweeps.</span></p>
       </div>
     </div>
     <div class="flow-item">
@@ -454,7 +454,7 @@ let LANG='ja';
 function t(k){return I18N[LANG][k];}
 
 /* ---------- state (loaded from database) ---------- */
-let settings={titleJa:'',titleEn:'',price:6000,maxParty:4,durJa:'',durEn:''};
+let settings={titleJa:'',titleEn:'',price:6000,maxParty:6,durJa:'',durEn:''};
 let slots=[];        // {id,date,time,capacity}
 let avail={};        // 'date|time' -> booked seats
 let reservations=[]; // admin only
