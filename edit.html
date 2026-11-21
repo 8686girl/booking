@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>ページ編集 ｜ 書道サロン 緒</title>
+<style>
+  :root{--shu:#C0392B;--shu-deep:#9C2B20;--sumi:#201E19;--washi:#F5EFE1;--line:#e5ddc9;--sub:#8a8172}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;color:var(--sumi);background:#efeadd}
+  /* ---- login ---- */
+  #login{min-height:100%;display:flex;align-items:center;justify-content:center;padding:24px}
+  .login-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:32px 30px;max-width:380px;width:100%;box-shadow:0 8px 30px rgba(0,0,0,.06)}
+  .login-card h1{font-size:18px;margin:0 0 4px}
+  .login-card p{font-size:13px;color:var(--sub);margin:0 0 20px;line-height:1.7}
+  label{display:block;font-size:12px;font-weight:700;color:var(--sub);margin:14px 0 5px}
+  input[type=email],input[type=password]{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:9px;font:inherit;background:#fdfbf5}
+  input:focus{outline:2px solid var(--shu);border-color:transparent}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:999px;background:var(--shu);color:#fff;font:inherit;font-weight:700;padding:11px 20px;cursor:pointer;transition:background .15s}
+  .btn:hover{background:var(--shu-deep)}
+  .btn:disabled{opacity:.5;cursor:default}
+  .btn.ghost{background:#fff;color:var(--sumi);border:1px solid var(--line)}
+  .btn.ghost:hover{background:#f6f1e6}
+  .msg{font-size:12.5px;color:var(--shu-deep);margin-top:12px;line-height:1.7;min-height:1px}
+  /* ---- editor ---- */
+  #editor{display:none;height:100%;flex-direction:column}
+  .bar{display:flex;align-items:center;gap:10px;padding:10px 16px;background:#fff;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .bar .ttl{font-weight:800;font-size:14px;margin-right:4px}
+  .bar .ttl small{font-weight:600;color:var(--sub);font-size:11px;margin-left:6px}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:#f6f1e6}
+  .seg button{border:none;background:transparent;font:inherit;font-size:12.5px;font-weight:700;color:var(--sub);padding:7px 14px;cursor:pointer}
+  .seg button.on{background:var(--sumi);color:#fff}
+  .spacer{flex:1}
+  .who{font-size:11.5px;color:var(--sub)}
+  .hint{font-size:12px;color:var(--sub);background:#fff;border-bottom:1px solid var(--line);padding:7px 16px;line-height:1.6}
+  .hint b{color:var(--shu-deep)}
+  .stage{flex:1;overflow:hidden;background:#e3ddcd;display:flex;justify-content:center;align-items:stretch;padding:20px}
+  .frame-wrap{background:#fff;box-shadow:0 6px 30px rgba(0,0,0,.14);transition:width .25s;width:100%;max-width:1180px;height:100%;border-radius:8px;overflow:hidden}
+  .frame-wrap.sp{width:390px;max-width:390px}
+  iframe{display:block;width:100%;height:100%;border:0}
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--sumi);color:#fff;padding:12px 22px;border-radius:999px;font-size:13.5px;font-weight:600;opacity:0;pointer-events:none;transition:all .25s;z-index:50}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .saving{display:none}
+</style>
+</head>
+<body>
+
+<!-- ログイン -->
+<div id="login">
+  <div class="login-card">
+    <h1>ページ編集</h1>
+    <p>書道サロン 緒 のホームページの文言を編集します。予約フォームの管理画面と同じメールアドレス・パスワードでログインしてください。</p>
+    <label>メールアドレス</label>
+    <input id="email" type="email" inputmode="email" autocomplete="username">
+    <label>パスワード</label>
+    <input id="pass" type="password" autocomplete="current-password">
+    <div style="height:18px"></div>
+    <button class="btn" id="btn-login" style="width:100%">ログイン</button>
+    <div class="msg" id="login-msg"></div>
+  </div>
+</div>
+
+<!-- 編集画面 -->
+<div id="editor">
+  <div class="bar">
+    <span class="ttl">ページ編集<small>書道サロン 緒</small></span>
+    <div class="seg" title="表示する画面サイズ">
+      <button id="v-pc" class="on" onclick="setView('pc')">PC</button>
+      <button id="v-sp" onclick="setView('sp')">スマホ</button>
+    </div>
+    <div class="seg" title="編集する言語">
+      <button id="l-ja" class="on" onclick="setLangEdit('ja')">日本語</button>
+      <button id="l-en" onclick="setLangEdit('en')">English</button>
+    </div>
+    <div class="spacer"></div>
+    <span class="who" id="who"></span>
+    <button class="btn ghost" onclick="window.open('/','_blank')">サイトを見る ↗</button>
+    <button class="btn" id="btn-publish" onclick="publish()">変更を公開する</button>
+    <button class="btn ghost" onclick="logout()">ログアウト</button>
+  </div>
+  <div class="hint">編集できる箇所（見出しやキャッチコピーなど）にマウスを乗せると枠が出ます。<b>クリックしてそのまま書き換え</b >、終わったら枠の外をクリック。英語を直すときは上の「English」に切り替えます。最後に<b>「変更を公開する」</b>で本番に反映されます。</div>
+  <div class="stage">
+    <div class="frame-wrap" id="frame-wrap">
+      <iframe id="frame" title="プレビュー"></iframe>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SB_URL='https://yvmymfjmrnghyumuvhcr.supabase.co';
+const SB_KEY='sb_publishable_I9n0m3Q1LLUa-1zes8dn6g_AXaRWl09';
+const sb=supabase.createClient(SB_URL,SB_KEY);
+
+let editReady=false;
+
+function toast(m){const el=document.getElementById('toast');el.textContent=m;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2200);}
+
+/* ---------- auth ---------- */
+async function check(){
+  const {data:{session}}=await sb.auth.getSession();
+  if(session){showEditor(session);}else{document.getElementById('login').style.display='flex';document.getElementById('editor').style.display='none';}
+}
+async function login(){
+  const email=document.getElementById('email').value.trim();
+  const password=document.getElementById('pass').value;
+  const msg=document.getElementById('login-msg');msg.textContent='';
+  const btn=document.getElementById('btn-login');btn.disabled=true;
+  const {error}=await sb.auth.signInWithPassword({email,password});
+  btn.disabled=false;
+  if(error){msg.textContent='ログインに失敗しました。メール・パスワードをご確認ください。';return;}
+  document.getElementById('pass').value='';
+  check();
+}
+async function logout(){await sb.auth.signOut();location.reload();}
+
+function showEditor(session){
+  document.getElementById('login').style.display='none';
+  document.getElementById('editor').style.display='flex';
+  document.getElementById('who').textContent=(session.user&&session.user.email)?('ログイン中: '+session.user.email):'';
+  const frame=document.getElementById('frame');
+  frame.src='/index.html?edit=1&_ts='+Date.now();
+}
+
+/* ---------- editor wiring ---------- */
+function getDoc(){const f=document.getElementById('frame');try{return f.contentDocument||f.contentWindow.document;}catch(e){return null;}}
+function fields(){const d=getDoc();return d?d.querySelectorAll('[data-edit]'):[];}
+
+function enableEditing(){
+  const d=getDoc();if(!d)return;
+  // inject outline style once
+  if(!d.getElementById('__editstyle')){
+    const st=d.createElement('style');st.id='__editstyle';
+    st.textContent='[contenteditable="true"]{outline:1px dashed rgba(192,57,43,.5);outline-offset:3px;border-radius:3px;cursor:text}[contenteditable="true"]:hover{background:rgba(192,57,43,.07)}[contenteditable="true"]:focus{outline:2px solid #C0392B;background:rgba(192,57,43,.09)}';
+    d.head.appendChild(st);
+  }
+  fields().forEach(el=>{
+    const parts=el.querySelectorAll(':scope > .ja, :scope > .en');
+    if(parts.length){parts.forEach(p=>p.setAttribute('contenteditable','true'));}
+    else{el.setAttribute('contenteditable','true');}
+  });
+  editReady=true;
+}
+
+// read text from a node, converting <br> to newline (works even if hidden)
+function readText(node){const h=node.innerHTML.replace(/<br\s*\/?>/gi,'\n');const d=document.createElement('div');d.innerHTML=h;return d.textContent.replace(/ /g,' ').trim();}
+
+function collect(){
+  const out={};
+  fields().forEach(el=>{
+    const key=el.getAttribute('data-edit');
+    const ja=el.querySelector(':scope > .ja'), en=el.querySelector(':scope > .en');
+    if(ja||en){const o={};if(ja)o.ja=readText(ja);if(en)o.en=readText(en);out[key]=o;}
+    else{out[key]={text:readText(el)};}
+  });
+  return out;
+}
+
+async function publish(){
+  if(!editReady){toast('読み込み中です。少し待ってからお試しください');return;}
+  const btn=document.getElementById('btn-publish');btn.disabled=true;btn.textContent='公開中…';
+  const payload=collect();
+  const {error}=await sb.from('settings').update({lp_content:payload}).eq('id',1);
+  btn.disabled=false;btn.textContent='変更を公開する';
+  if(error){
+    if(String(error.message||'').includes('lp_content')){toast('公開できません：lp_content 列が未作成です');}
+    else{toast('公開に失敗しました');}
+    console.error(error);return;
+  }
+  toast('公開しました。本番ページに反映されています');
+}
+
+/* ---------- view / language ---------- */
+function setView(v){
+  document.getElementById('frame-wrap').classList.toggle('sp',v==='sp');
+  document.getElementById('v-pc').classList.toggle('on',v==='pc');
+  document.getElementById('v-sp').classList.toggle('on',v==='sp');
+}
+function setLangEdit(l){
+  document.getElementById('l-ja').classList.toggle('on',l==='ja');
+  document.getElementById('l-en').classList.toggle('on',l==='en');
+  const f=document.getElementById('frame');
+  try{if(f.contentWindow&&f.contentWindow.setLang)f.contentWindow.setLang(l);}catch(e){}
+}
+
+/* the LP tells us it has applied saved content and is ready */
+window.addEventListener('message',e=>{if(e.data&&e.data.type==='lp-ready'){setTimeout(enableEditing,60);}});
+// fallback: also try on iframe load + poll
+document.getElementById('frame').addEventListener('load',()=>{
+  let n=0;const iv=setInterval(()=>{const d=getDoc();if((d&&d.defaultView&&d.defaultView.__lpReady)||n>40){clearInterval(iv);enableEditing();}n++;},150);
+});
+
+document.getElementById('btn-login').addEventListener('click',login);
+document.getElementById('pass').addEventListener('keydown',e=>{if(e.key==='Enter')login();});
+check();
+</script>
+</body>
+</html>
