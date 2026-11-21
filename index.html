@@ -140,9 +140,13 @@
   .tag.cancel{background:#fdeeee;color:#c0392b}
   .mini{border:0;background:#fff;border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer;font-weight:700}
   .mini:hover{border-color:var(--brand);color:var(--brand)}
-  .adm-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
-  .adm-tabs button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 16px;font-weight:700;font-size:13px;cursor:pointer;color:var(--sub)}
-  .adm-tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .adm-tabs{display:flex;gap:10px 24px;margin-bottom:20px;flex-wrap:wrap;align-items:flex-end}
+  .tab-group{display:flex;flex-direction:column;gap:6px}
+  .tab-group-label{font-size:10.5px;font-weight:800;letter-spacing:.09em;color:var(--sub);opacity:.7;padding-left:6px}
+  .tab-row{display:inline-flex;gap:5px;flex-wrap:wrap;background:var(--soft);padding:5px;border-radius:14px}
+  .adm-tabs button{border:0;background:transparent;border-radius:10px;padding:8px 16px;font-weight:700;font-size:13px;cursor:pointer;color:var(--sub);white-space:nowrap;transition:all .12s}
+  .adm-tabs button:hover{color:var(--ink)}
+  .adm-tabs button.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.1)}
   .set-row{display:grid;grid-template-columns:150px 1fr;gap:14px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
   .slot-add{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--soft);padding:12px;border-radius:12px;margin:12px 0}
   .slot-add input,.slot-add select{width:auto}
@@ -342,12 +346,21 @@
       <button class="mini" onclick="adminLogout()">ログアウト</button>
     </div>
     <div class="adm-tabs">
-      <button class="on" id="at-res" onclick="admTab('res')">予約一覧</button>
-      <button id="at-slot" onclick="admTab('slot')">空き枠の設定（日付ごと）</button>
-      <button id="at-set" onclick="admTab('set')">体験の設定</button>
-      <button id="at-news" onclick="admTab('news')">お知らせ</button>
-      <button id="at-page" onclick="admTab('page')">ページ編集</button>
-      <button id="at-acct" onclick="admTab('acct')">管理者</button>
+      <div class="tab-group">
+        <span class="tab-group-label">予約・運用</span>
+        <div class="tab-row">
+          <button class="on" id="at-res" onclick="admTab('res')">予約一覧</button>
+          <button id="at-slot" onclick="admTab('slot')">空き枠</button>
+          <button id="at-news" onclick="admTab('news')">お知らせ</button>
+        </div>
+      </div>
+      <div class="tab-group">
+        <span class="tab-group-label">設定</span>
+        <div class="tab-row">
+          <button id="at-set" onclick="admTab('set')">体験設定</button>
+          <button id="at-acct" onclick="admTab('acct')">管理者</button>
+        </div>
+      </div>
     </div>
 
     <!-- reservations -->
@@ -415,15 +428,6 @@
       <div class="card" style="padding:22px;max-width:720px;margin-top:16px">
         <b style="font-size:15px">投稿済みのお知らせ</b>
         <div id="news-list" style="margin-top:12px"></div>
-      </div>
-    </div>
-
-    <!-- page editor link -->
-    <div id="adm-page" style="display:none">
-      <div class="card" style="padding:22px;max-width:720px">
-        <b style="font-size:15px">ホームページの文言を編集</b>
-        <p style="color:var(--sub);font-size:13px;margin:6px 0 16px;line-height:1.8">ホームページ（itoguchi-calligraphy.com）の見出し・キャッチコピー・料金・各セクションの説明文などを、本番ページを見ながら直接編集できます。PC／スマホの切り替えプレビュー付きです。下のボタンから編集画面を開いてください（同じメール・パスワードでログインできます）。</p>
-        <a class="btn btn-primary" style="width:auto;display:inline-flex;text-decoration:none;align-items:center;justify-content:center" href="https://itoguchi-calligraphy.com/edit.html" target="_blank" rel="noopener">ページ編集を開く ↗</a>
       </div>
     </div>
 
@@ -720,7 +724,7 @@ async function addAdmin(){
 
 /* ---------- admin: tabs ---------- */
 function admTab(tab){
-  ['res','slot','set','news','page','acct'].forEach(x=>{
+  ['res','slot','set','news','acct'].forEach(x=>{
     document.getElementById('adm-'+x).style.display=x===tab?'block':'none';
     document.getElementById('at-'+x).classList.toggle('on',x===tab);
   });
