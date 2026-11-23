@@ -434,9 +434,16 @@
     <!-- admins -->
     <div id="adm-acct" style="display:none">
       <div class="card" style="padding:22px;max-width:560px">
+        <b style="font-size:15px">登録済みの管理者</b>
+        <p style="color:var(--sub);font-size:13px;margin:6px 0 14px">この管理画面（および予約フォーム）にログインできる方の一覧です。</p>
+        <div id="admins-list"></div>
+      </div>
+      <div class="card" style="padding:22px;max-width:560px;margin-top:16px">
         <b style="font-size:15px">管理者を追加</b>
-        <p style="color:var(--sub);font-size:13px;margin:6px 0 14px">新しい管理者のメールアドレスとパスワードを設定します。追加後、その方は管理画面（URLの末尾に <b>#admin</b> を付けたページ）から、同じメール・パスワードでログインできます。</p>
-        <label class="f" style="margin:0">メールアドレス</label>
+        <p style="color:var(--sub);font-size:13px;margin:6px 0 14px">新しい管理者のお名前・メールアドレス・パスワードを設定します。追加後、その方は管理画面（URLの末尾に <b>#admin</b> を付けたページ）から、同じメール・パスワードでログインできます。</p>
+        <label class="f" style="margin:0">お名前</label>
+        <input id="na-name" autocomplete="off" placeholder="例：神田はるか">
+        <label class="f">メールアドレス</label>
         <input id="na-email" inputmode="email" autocomplete="off">
         <label class="f">パスワード（6文字以上）</label>
         <input id="na-pass" type="password" autocomplete="new-password">
@@ -496,6 +503,7 @@ let avail={};        // 'date|time' -> booked seats
 let reservations=[]; // admin only
 let news=[];         // [{id,date,titleJa,bodyJa,titleEn,bodyEn,pub}]
 let newsEditId=null; // id being edited, or null for new post
+let admins=[];       // [{email,name}] 表示用の管理者名簿
 
 function mapSettings(r){return{titleJa:r.title_ja,titleEn:r.title_en,price:r.price,maxParty:r.max_party,durJa:r.dur_ja,durEn:r.dur_en};}
 function rebuildAvail(){avail={};reservations.filter(x=>x.status!=='cancel').forEach(x=>{const k=x.date+'|'+x.time;avail[k]=(avail[k]||0)+Number(x.num);});}
@@ -520,7 +528,7 @@ async function loadAdmin(){
   ]);
   reservations=r.data||[];
   slots=sl.data||[];
-  if(s.data){settings=mapSettings(s.data);news=Array.isArray(s.data.news_json)?s.data.news_json:[];}
+  if(s.data){settings=mapSettings(s.data);news=Array.isArray(s.data.news_json)?s.data.news_json:[];admins=Array.isArray(s.data.admins_json)?s.data.admins_json:[];}
   rebuildAvail();
 }
 
@@ -699,11 +707,26 @@ async function adminLogin(){
   enterAdmin();
 }
 async function adminLogout(){await sb.auth.signOut();enterAdmin();}
+function renderAdmins(){
+  const box=document.getElementById('admins-list');if(!box)return;box.innerHTML='';
+  if(!admins.length){box.innerHTML='<div class="empty">まだ登録がありません。</div>';return;}
+  admins.forEach(a=>{
+    const el=document.createElement('div');
+    el.className='date-group';el.style.cssText='display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;margin-bottom:8px';
+    el.innerHTML=`<div style="min-width:0">
+        <div style="font-weight:700">${esc(a.name||'（名前未設定）')}</div>
+        <div style="font-size:12.5px;color:var(--sub);word-break:break-all">${esc(a.email||'')}</div>
+      </div>`;
+    box.appendChild(el);
+  });
+}
 async function addAdmin(){
+  const name=document.getElementById('na-name').value.trim();
   const email=document.getElementById('na-email').value.trim();
   const pass=document.getElementById('na-pass').value;
   const msg=document.getElementById('na-msg');
   msg.style.color='#c0392b';msg.textContent='';
+  if(!name){msg.textContent='お名前を入力してください。';return;}
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){msg.textContent='メールアドレスの形式をご確認ください。';return;}
   if(pass.length<6){msg.textContent='パスワードは6文字以上で設定してください。';return;}
   const btn=document.getElementById('btn-add-admin');btn.disabled=true;btn.textContent='追加中…';
@@ -713,7 +736,11 @@ async function addAdmin(){
   if(cur){try{await sb.auth.setSession({access_token:cur.access_token,refresh_token:cur.refresh_token});}catch(e){}}
   btn.disabled=false;btn.textContent='管理者を追加';
   if(error){msg.textContent='追加できませんでした（'+error.message+'）。すでに登録済みのメール、または新規登録が無効になっている可能性があります。';return;}
-  document.getElementById('na-email').value='';document.getElementById('na-pass').value='';
+  // 表示用の名簿に追加して保存（重複メールは上書き）
+  admins=admins.filter(a=>a.email!==email);admins.push({email,name});
+  try{await sb.from('settings').update({admins_json:admins}).eq('id',1);}catch(e){console.error(e);}
+  renderAdmins();
+  document.getElementById('na-name').value='';document.getElementById('na-email').value='';document.getElementById('na-pass').value='';
   msg.style.color='var(--brand)';
   if(data&&!data.session&&data.user){
     msg.textContent='確認メールを送信しました。新しい管理者は届いたメール内のリンクを承認したあと、このメール・パスワードでログインできます。';
@@ -732,6 +759,7 @@ function admTab(tab){
   if(tab==='slot')renderSlotAdmin();
   if(tab==='set')loadSettingsForm();
   if(tab==='news')renderNewsAdmin();
+  if(tab==='acct')renderAdmins();
 }
 function jpDate(ds){const dt=parseYmd(ds);return `${dt.getMonth()+1}月${dt.getDate()}日(${DOW_JA[dt.getDay()]})`;}
 function renderRes(){
